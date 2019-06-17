@@ -3,7 +3,6 @@ package services.wallets.controller;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.graalvm.util.CollectionsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import services.wallets.controller.resources.WalletBody;
 import services.wallets.controller.resources.WalletResponse;
 import services.wallets.controller.resources.mapper.WalletResourcesMapper;
-import services.wallets.entities.Wallet;
+import services.wallets.model.Wallet;
 import services.wallets.services.interfaces.WalletService;
 
 @RestController
-@RequestMapping(value = "/api/v1/wallets", produces = RestConstants.APPLICATION_HAL_JSON_VALUE)
+@RequestMapping(value = "/api/v1/wallets")
 public class WalletController {
   @Autowired
   private final WalletService walletService;
@@ -32,7 +31,7 @@ public class WalletController {
   }
 
   @GetMapping()
-  public ResponseEntity<List<WalletResponse>> getAllWallets() {
+  public ResponseEntity getAllWallets() {
     return this.generateResponseEntity(this.walletService.getAllWallets());
   }
 
@@ -50,7 +49,7 @@ public class WalletController {
   @PostMapping()
   public ResponseEntity<WalletResponse> saveWallet(@RequestBody final WalletBody walletResource) {
     Wallet wallet = this.walletService
-        .saveWallet(WalletResourcesMapper.INSTANCE.bodyToEntity(walletResource));
+        .saveWallet(WalletResourcesMapper.INSTANCE.bodyToModel(walletResource));
 
     return this.generateResponseEntity(wallet, HttpStatus.OK);
   }
@@ -61,7 +60,7 @@ public class WalletController {
       @RequestBody final WalletBody walletResource) {
 
     Wallet wallet = this.walletService
-        .updateWallet(walletId, WalletResourcesMapper.INSTANCE.bodyToEntity(walletResource));
+        .updateWallet(walletId, WalletResourcesMapper.INSTANCE.bodyToModel(walletResource));
 
     return this.generateResponseEntity(wallet, HttpStatus.OK);
   }
@@ -74,17 +73,18 @@ public class WalletController {
   }
 
   private ResponseEntity<WalletResponse> generateResponseEntity(Wallet wallet, HttpStatus code) {
-    return new ResponseEntity<>(WalletResourcesMapper.INSTANCE.entityToResponse(wallet), code);
+    return new ResponseEntity<>(WalletResourcesMapper.INSTANCE.modelToResponse(wallet), code);
   }
 
   private ResponseEntity<List<WalletResponse>> generateResponseEntity(List<Wallet> wallets) {
-    if (wallets.isEmpty()) {
-      return new ResponseEntity(Collections.emptyList(), HttpStatus.OK);
+    if (!wallets.isEmpty()) {
+      return new ResponseEntity<>(
+          wallets.stream().map(WalletResourcesMapper.INSTANCE::modelToResponse).collect(Collectors.toList()),
+          HttpStatus.OK
+      );
     }
 
-    return new ResponseEntity<>(
-        wallets.stream().map(WalletResourcesMapper.INSTANCE::entityToResponse).collect(Collectors.toList()),
-        HttpStatus.OK
-    );
+    return new ResponseEntity(Collections.emptyList(), HttpStatus.OK);
+
   }
 }

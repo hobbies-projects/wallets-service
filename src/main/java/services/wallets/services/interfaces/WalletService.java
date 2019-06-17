@@ -1,7 +1,7 @@
 package services.wallets.services.interfaces;
 
 import java.util.List;
-import services.wallets.entities.Wallet;
+import services.wallets.model.Wallet;
 
 public interface WalletService {
   List<Wallet> getAllWallets();

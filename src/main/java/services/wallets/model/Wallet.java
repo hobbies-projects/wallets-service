@@ -1,13 +1,12 @@
-package services.wallets.controller.resources;
-
+package services.wallets.model;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-public class WalletBody {
+@Setter
+public class Wallet {
   private String walletId;
   private String name;
   private String description;
